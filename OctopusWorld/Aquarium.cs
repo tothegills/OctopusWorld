@@ -1,17 +1,18 @@
 using System.Collections.Generic;
+using OctopusWorld.FishFactories;
 using OctopusWorld.Models.Fish;
 
 namespace OctopusWorld
 {
-    public class Aquarium
+    public class Aquarium : IAquarium
     {
         private readonly IStingRay stingRay;
         private readonly IMarlin marlin;
 
-        public Aquarium(IStingRay stingRay, IMarlin marlin)
+        public Aquarium(ICreateFish fishFactory)
         {
-            this.stingRay = stingRay;
-            this.marlin = marlin;
+            stingRay = fishFactory.CreateStingRay();
+            marlin = fishFactory.CreateMarlin();
         }
 
         public List<IFish> GetFishes()
@@ -21,5 +22,10 @@ namespace OctopusWorld
                 stingRay, marlin
             };
         }
+    }
+
+    public interface IAquarium
+    {
+        List<IFish> GetFishes();
     }
 }

@@ -8,6 +8,11 @@ namespace OctopusWorld
     public class FishFoodManufacturer : IFishFoodManufacturer
     {
 
+        public FishFoodManufacturer()
+        {
+
+        }
+
         public List<IFishFood> CreateFishFood<T>(int number) where T: IFishFood
         {
             return CreateFishFood(number, typeof(T));
@@ -26,6 +31,7 @@ namespace OctopusWorld
                 {
                     var t when t == typeof(Snail) => new Snail(),
                     var t when t == typeof(Mackerel) => new Mackerel(),
+                    var t when t == typeof(Squid) => new Squid(),
                     _ => throw new Exception("Could not figure out the type of fish food to create")
                 };
             }

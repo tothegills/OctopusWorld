@@ -3,13 +3,14 @@ using OctopusWorld.Models.FishFood;
 
 namespace OctopusWorld
 {
-    public class FishFoodInventoryReplenisher
+    public class FishFoodInventoryReplenisher : IReplenishFishFood, IHandleFishFoodInventoryEvents
     {
         private IFishFoodManufacturer fishFoodManufacturer;
 
         public FishFoodInventoryReplenisher(IFishFoodManufacturer fishFoodManufacturer)
         {
             this.fishFoodManufacturer = fishFoodManufacturer;
+
         }
 
         public void InventoryUpdated(object sender, InventoryUpdatedEventArgs e)
@@ -26,5 +27,14 @@ namespace OctopusWorld
                 inventory.Add(newFood);
             }
         }
+    }
+
+    public interface IReplenishFishFood
+    {
+    }
+
+    public interface IHandleFishFoodInventoryEvents
+    {
+        void InventoryUpdated(object sender, InventoryUpdatedEventArgs e);
     }
 }

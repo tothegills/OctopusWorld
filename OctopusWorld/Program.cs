@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using Autofac;
+using Autofac.Core;
 using OctopusWorld.FishFactories;
 using OctopusWorld.Models.FishFood;
 
@@ -10,24 +12,44 @@ namespace OctopusWorld
     {
         static void Main()
         {
-            var pacificFishFactory = new PacificFishFactory();
-            var pacificThemedAquarium = new Aquarium(pacificFishFactory.CreateStingRay(), pacificFishFactory.CreateMarlin());
 
-            var fishFoodManufacturer = new FishFoodManufacturer();
+            // Create your builder.
+            var builder = new ContainerBuilder();
 
-            var initialFishFoodInventory = fishFoodManufacturer.CreateFishFood<Snail>(3)
-                .Concat(fishFoodManufacturer.CreateFishFood<Mackerel>(5)).ToList();
+            builder.RegisterType<PacificFishFactory>().As<ICreateFish>();
 
-            var fishFoodInventory = new FishFoodInventory(initialFishFoodInventory);
+            builder.RegisterType<Aquarium>().As<IAquarium>();
 
-            var observableFishFoodInventory = new ObservableFishFoodInventory(fishFoodInventory);
-            var pacificFishFeeder = new FishFeeder(pacificThemedAquarium, observableFishFoodInventory);
-            var fishFoodReplenisher = new FishFoodInventoryReplenisher(fishFoodManufacturer);
-            observableFishFoodInventory.InventoryChanged += fishFoodReplenisher.InventoryUpdated;
+            builder.RegisterType<FishFoodManufacturer>().As<IFishFoodManufacturer>();
+
+            builder.Register((containerContext) =>
+            {
+                var fishFoodManufacturer = containerContext.Resolve<IFishFoodManufacturer>();
+
+                var initialFishFoodInventory = fishFoodManufacturer.CreateFishFood<Snail>(3)
+                    .Concat(fishFoodManufacturer.CreateFishFood<Mackerel>(5)).ToList();
+
+                return initialFishFoodInventory;
+            }).InstancePerLifetimeScope();
+
+            builder.RegisterType<FishFoodInventory>().As<IFishFoodInventory>();
+            builder.RegisterDecorator<ObservableFishFoodInventory, IFishFoodInventory>();
+
+
+
+            builder.RegisterType<FishFeeder>().As<IFeedFish>();
+            builder.RegisterType<FishFoodInventoryReplenisher>().As<IReplenishFishFood>().As<IHandleFishFoodInventoryEvents>();
+
+            var container = builder.Build();
+
+            var fishFeeder = container.Resolve<IFeedFish>();
+            var aquarium = container.Resolve<IAquarium>();
+            var fishFoodInventory = container.Resolve<IFishFoodInventory>();
 
             while (true)
             {
-                pacificFishFeeder.FeedFishes();
+                var fishes = aquarium.GetFishes();
+                fishFeeder.FeedFishes(fishes);
                 Console.WriteLine(fishFoodInventory);
                 Thread.Sleep(1000);
             }
@@ -35,4 +57,5 @@ namespace OctopusWorld
     }
 
     // builder.WithSnails(5).WithMackerel(5).Build();
+    // builder.WithSnails(5).WithFishFoodType(type, num).build();
 }

@@ -4,24 +4,17 @@ using OctopusWorld.Models.FishFood;
 
 namespace OctopusWorld
 {
-    public class FishFeeder
+    public class FishFeeder : IFeedFish
     {
-        private List<IFish> fishes;
+
         private IFishFoodInventory fishFoodInventory;
 
-        public FishFeeder(List<IFish> fishes, IFishFoodInventory fishFoodInventory)
+        public FishFeeder(IFishFoodInventory fishFoodInventory)
         {
-            this.fishes = fishes;
             this.fishFoodInventory = fishFoodInventory;
         }
 
-        public FishFeeder(Aquarium aquarium, IFishFoodInventory fishFoodInventory)
-        {
-            fishes = aquarium.GetFishes();
-            this.fishFoodInventory = fishFoodInventory;
-        }
-
-        public void FeedFishes()
+        public void FeedFishes(List<IFish> fishes)
         {
             foreach (var fish in fishes)
             {
@@ -33,5 +26,10 @@ namespace OctopusWorld
                 }
             }
         }
+    }
+
+    public interface IFeedFish
+    {
+        void FeedFishes(List<IFish> fishes);
     }
 }

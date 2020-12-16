@@ -19,9 +19,14 @@ namespace OctopusWorld.Models.FishFood
 
         public event EventHandler<InventoryUpdatedEventArgs> InventoryChanged;
 
-        public ObservableFishFoodInventory(IFishFoodInventory decorated)
+        public ObservableFishFoodInventory(IFishFoodInventory decorated, IList<IHandleFishFoodInventoryEvents> observers)
         {
             this.decorated = decorated;
+
+            foreach (var observer in observers)
+            {
+                InventoryChanged += observer.InventoryUpdated;
+            }
         }
 
         public IFishFood Take(FavoriteFood typeOfFishFood)
